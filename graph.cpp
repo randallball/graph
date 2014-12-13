@@ -61,19 +61,17 @@ void init_graph_from_file(graph& g, const string& filename, double limit)
 	string city_name, country, N, W;
 	int lat1, lat2, long1, long2;
 	ifstream file_to_read;
-	char compass_dir;
-
 	// open the data file of cities
 	open_for_read(file_to_read, filename);
 	while (is_more_stuff_there(file_to_read))
 	{
 		file_to_read >> city_name >> country >> lat1 >> lat2 >> N >> long1 >> long2 >> W;
-		if (N == 'S')
+		if (N == "S")
 		{
 			lat1 *= -1;
 			lat2 *= -1;
 		}
-		if (W == 'W')
+		if (W == "W")
 		{
 			long1 *= -1;
 			long2 *= -1;
@@ -84,11 +82,11 @@ void init_graph_from_file(graph& g, const string& filename, double limit)
 		vertex city(city_name, lat1, lat2, long1, long2);
 		g.add_vertex(city);
 	}
-	for (unsigned int i = 0; i < g.vertices.size(), i++)
+	for (unsigned int i = 0; i < g.vertices.size(); i++)
 	{
 		for (unsigned int j = i; j < g.vertices.size(); j++)
 		{
-			g.add_edge(g.vertices[i], g.vertices[j], limit);
+			g.add_edge(&g.vertices[i], &g.vertices[j], limit);
 		}
 	}
 
@@ -114,6 +112,103 @@ bool is_more_stuff_there(ifstream& f)
 		return (f && (f.peek() != EOF));
 }
 
+bool does_dfs_path_exist(const string& city1, const string& city2)
+{
+	map<vertex*, bool> visited;
+	map<vertex*, vertex*> path;
+	vertex* v;
+	vertex* u;
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		visited.insert(pair<vertex*, bool> (&vertices[i], false));
+		path.insert(pair<vertex*, vertex*> (&vertices[i], nullptr));
+		if (vertices[i].get_city_name() == city1)
+			v = &vertices[i];
+		if (vertices[i].get_city_name() == city2)
+			u = &vertices[i];
+	}
+	deque<vertex*> yet_to_explore;
+	visited[v] = true;
+	yet_to_explore.push_back(v);
+	graph::depth_first_search(u, visited, &yet_to_explore, path);
+}
 
+bool depth_first_search(vertex* u, map<vertex*, bool>& visited, deque<vertex*>& yet_to_explore, map<vertex*, vertex*>& path)
+{
+	if (!yet_to_explore.empty())
+	{
+		vertex* w = yet_to_explore.back();
+		yet_to_explore.pop_back();
+		if (w->get_city_name() == u->get_city_name())
+			return true;
+		vector<vertex*>::iterator it;
+		for (it=edges[w].begin(); it != edges[w].end(); ++it)
+		{
+			vertex* neighbor = *it;
+			if (visited[neighbor] == false)
+			{
+				yet_to_explore.push_back(neighbor);
+				visited[neighbor] = true;
+				path[neighbor] = w;
+			}
+		}
+		return depth_first_search(u, visited, yet_to_explore, path);
+	}
+	else
+		return false;
+}
 
+bool does_bfs_path_exist(const string& city1, const string& city2);
+{
+	map<vertex*, bool> visited;
+	map<vertex*, vertex*> path;
+	vertex* v;
+	vertex* u;
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		visited.insert(pair<vertex*, bool> (&vertices[i], false));
+		path.insert(pair<vertex*, vertex*> (&vertices[i], nullptr));
+		if (vertices[i].get_city_name() == city1)
+			v = &vertices[i];
+		if (vertices[i].get_city_name() == city2)
+			u = &vertices[i];
+	}
+	deque<vertex*>& yet_to_explore;
+	visited[v] = true;
+	yet_to_explore.push_back(v);
+	if (depth_first_search(u, visited, yet_to_explore, path))
+	{
+		vertex* cursor = u;
+		while (cursor != v)
+		{
+			cout << path[cursor].get_city_name();
+			cursor = path[cursor];
+		}
+	}
+	
+}
 
+bool breadth_first_search(vertex* u, map<vertex*, bool>& visited, deque<vertex*>& yet_to_explore, map<vertex*, vertex*>& path)
+{
+	if (!yet_to_explore.empty())
+	{
+		vertex* w = yet_to_explore.front();
+		yet_to_explore.pop_front();
+		if (w->get_city_name() == u->get_city_name())
+			return true;
+		vector<vertex*>::iterator it;
+		for (it=edges[w].begin(); it != edges[w].end(); ++it)
+		{
+			vertex* neighbor = *it;
+			if (visited[neighbor] == false)
+			{
+				yet_to_explore.push_back(neighbor);
+				visited[neighbor] = true;
+				path[neighbor] = w;
+			}
+		}
+		return depth_first_search(u, visited, yet_to_explore, path);
+	}
+	else
+		return false;
+}

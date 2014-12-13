@@ -34,7 +34,7 @@ class graph
 	bool breadth_first_search(vertex* u, map<vertex*, bool>& visited, deque<vertex*>& vertex_list, map<vertex*, vertex*>& path);
 	double great_circle_distance(const vertex& v, const vertex& u) const;
 	
-	friend void init_graph_from_file(graph& g, const string& filename, double limit=0.0);
+	friend void init_graph_from_file(graph& g, const string& filename, double limit);
 	
 	private:
 		// list of cities
